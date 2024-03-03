@@ -1,0 +1,1 @@
+python3 RishatTestTask/manage.py collectstatic --no-input; python3 RishatTestTask/manage.py migrate; python3 RishatTestTask/manage.py loaddata payments.json; python3 RishatTestTask/manage.py runserver 0.0.0.0:8000;

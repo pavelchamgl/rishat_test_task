@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Order</title>
+</head>
+<body>
+    <h1>Select Items to Purchase</h1>
+    <form id="order-form">
+        {% for item in items %}
+            <div>
+                <h2>{{ item.name }}</h2>
+                <p>{{ item.description }}</p>
+                <p>Price: ${{ item.price }}</p>
+                <input type="checkbox" name="items" value="{{ item.id }}">
+            </div>
+        {% endfor %}
+
+        <h2>Select Discounts</h2>
+        {% for discount in discounts %}
+            <div>
+                <input type="checkbox" name="discounts" value="{{ discount.id }}">
+                <label>{{ discount.name }} - ${{ discount.amount }}</label>
+            </div>
+        {% endfor %}
+
+        <button type="submit">Create Order</button>
+    </form>
+
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        document.getElementById('order-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            var selectedItems = [];
+            var checkboxes = document.getElementsByName('items');
+            checkboxes.forEach(function(checkbox) {
+                if (checkbox.checked) {
+                    selectedItems.push(checkbox.value);
+                }
+            });
+
+
+            var selectedDiscounts = [];
+            var discountCheckboxes = document.getElementsByName('discounts');
+            discountCheckboxes.forEach(function(checkbox) {
+                if (checkbox.checked) {
+                    selectedDiscounts.push(checkbox.value);
+                }
+            });
+
+
+            var url = '/process_order/?items=' + selectedItems.join('&items=') +
+                      '&discounts=' + selectedDiscounts.join('&discounts=');
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    var stripe = Stripe('pk_test_51OoUYTGgS7Y3554YB6II4tZiSzjExR2D7uTxUMyrXrgeSnHBAvBlf5m8B2fohAkdwhAs8l1JyGnWutldRq8CjP3b00ozbXx84U');
+                    stripe.redirectToCheckout({sessionId: data.session_id});
+                });
+        });
+    </script>
+</body>
+</html>
